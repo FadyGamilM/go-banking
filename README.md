@@ -1,7 +1,7 @@
 # go-banking
 Backend service for bank application.
 
-#` 1- Database Design`
+# 1- Database Design
 
 ![tables](./account_db_design.png)
 
