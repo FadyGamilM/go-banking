@@ -1,7 +1,17 @@
 # go-banking
 Backend service for bank application.
 
-# 1- Database Design
+# Supported Features 
+- Create and manage a bank account
+    <br>➜ Each bank has an owner, balance, and currency.
+
+- Keep records of all the balance changes of the bank account
+    <br>➜ Each bank operation done to the account, a new account entry will be created and recoreded.
+
+- Money transfer transacitons between bank accounts
+    <br>➜ Keep the money transfer consistent between 2 accounts with a transaction.
+
+# Database Design
 
 ![tables](./account_db_design.png)
 
