@@ -2,7 +2,7 @@ package domain
 
 import "time"
 
-type account struct {
+type Account struct {
 	ID        int64     `json:"id"`
 	OwnerName string    `json:"owner_name"`
 	Balance   float64   `json:"balance"`

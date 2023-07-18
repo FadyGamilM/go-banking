@@ -2,7 +2,7 @@ package domain
 
 import "time"
 
-type transfer struct {
+type Transfer struct {
 	ID            int64 `json:"id"`
 	FromAccountID int64 `json:"from_account_id"`
 	ToAccountID   int64 `json:"to_account_id"`
