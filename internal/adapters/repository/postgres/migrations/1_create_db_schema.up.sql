@@ -44,7 +44,6 @@ CREATE TABLE IF NOT EXISTS transfers(
   	to_account BIGINT REFERENCES accounts(id),
   	from_account BIGINT REFERENCES accounts(id),
   	amount DECIMAL Not NULL CHECK(Amount > 0),
-  	deleted BOOLEAN Not NULL DEFAULT FALSE,
 	created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
 	updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );
