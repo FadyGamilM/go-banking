@@ -1,8 +1,10 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"log"
+	"time"
 )
 
 // function to test the connection before applying the connection
@@ -39,4 +41,10 @@ func ConnectToPostgresInstance(DSN string, args DbArgs) (*sql.DB, error) {
 	}
 	// return the response
 	return pool_of_conn, nil
+}
+
+func CreateContext() (context.Context, context.CancelFunc) {
+	// define context
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	return ctx, cancel
 }

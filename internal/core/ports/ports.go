@@ -8,6 +8,7 @@ type Update_account_params struct {
 	Currency *string
 }
 
+// Now the core.service layer don't need to know anything about the impl, it will just depends on this interface
 type AccountRepository interface {
 	Create(*domain.Account) error
 	GetAll() ([]*domain.Account, error)

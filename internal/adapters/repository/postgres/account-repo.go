@@ -1,12 +1,10 @@
 package postgres
 
 import (
-	"context"
 	"fmt"
 	"gobanking/internal/core/domain"
 	"log"
 	"strings"
-	"time"
 )
 
 type Account_repo struct {
@@ -15,8 +13,7 @@ type Account_repo struct {
 
 // CREATE REQUEST
 func (ar *Account_repo) Create(account domain.Account) error {
-	// create ctx
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := CreateContext()
 	defer cancel()
 
 	// define the query
@@ -40,7 +37,7 @@ func (ar *Account_repo) Create(account domain.Account) error {
 func (ar *Account_repo) GetAll() ([]*domain.Account, error) {
 
 	// create ctx
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := CreateContext()
 	defer cancel()
 
 	// define the query
@@ -82,7 +79,7 @@ func (ar *Account_repo) GetAll() ([]*domain.Account, error) {
 func (ar *Account_repo) GetById(id int) (*domain.Account, error) {
 
 	// create ctx
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := CreateContext()
 	defer cancel()
 
 	// define the query
@@ -114,7 +111,7 @@ func (ar *Account_repo) GetById(id int) (*domain.Account, error) {
 func (ar *Account_repo) GetByOwnerName(ownerName string) (*domain.Account, error) {
 
 	// create ctx
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := CreateContext()
 	defer cancel()
 
 	// define the query
@@ -151,7 +148,7 @@ type Update_account_params struct {
 
 func (ar *Account_repo) Update(id int, update_params Update_account_params) (*domain.Account, error) {
 	// create ctx
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := CreateContext()
 	defer cancel()
 
 	// define the query
@@ -162,12 +159,14 @@ func (ar *Account_repo) Update(id int, update_params Update_account_params) (*do
 	)
 
 	updateQuery.WriteString("UPDATE accounts SET ")
+	// validation that the balance is there and its value is not less than 0
 	if update_params.Balance != nil && !(*update_params.Balance < 0) {
 		updateQuery.WriteString(fmt.Sprintf("balance = $%d,", paramCount))
 		paramCount++
 		// append the value to pass it to the query by the order of the count it took in the line before
 		params = append(params, *update_params.Balance)
 	}
+	// validation that the currency is there and not empty
 	if update_params.Currency != nil && !(*update_params.Currency == "") {
 		updateQuery.WriteString(fmt.Sprintf("currency = $%d ", paramCount))
 		paramCount++
@@ -184,15 +183,15 @@ func (ar *Account_repo) Update(id int, update_params Update_account_params) (*do
 		return nil, err
 	}
 
+	// fetch back the updated acc from database
 	updated_account, _ := ar.GetById(id)
 
 	return updated_account, nil
-
 }
 
 // DELETE REQUEST
 func (ar *Account_repo) Delete(id int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := CreateContext()
 	defer cancel()
 
 	query := `DELETE FROM accounts WHERE id = $1`
