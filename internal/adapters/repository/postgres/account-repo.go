@@ -206,6 +206,23 @@ func (ar *Account_repo) Delete(id int) error {
 	return nil
 }
 
+func (ar *Account_repo) GetBalanceById(id int) (*float64, error) {
+	ctx, cancel := CreateContext()
+	defer cancel()
+
+	query := `SELECT balance FROM accounts WHERE id = $1`
+
+	var balance float64
+
+	err := ar.repo.db.QueryRowContext(ctx, query, id).Scan(&balance)
+	if err != nil {
+		log.Println("error while retrieving the balance of the account : ", err)
+		return nil, err
+	}
+
+	return &balance, nil
+}
+
 func NewAccountRepo(repo *Postgres_repo) *Account_repo {
 	return &Account_repo{repo: repo}
 }

@@ -42,7 +42,16 @@ func (ts *TransactionStore) TransferMoneyTx(tx_args TransferTxParams) (*Transfer
 
 	// execute queries within the transaction
 	//! 1. check that the sending acc has 10 usd
-	_, err = tx.ExecContext(ctx, `SELECT balance FROM accounts WHERE id = $1`, tx_args.FromAccountID)
+	// fetch the account
+	balance, err := ts.acc_repo.GetBalanceById(tx_args.FromAccountID)
+	if *balance < tx_args.Amount {
+		log.Println("The balance of the accoutn is less than the required amount for the transaction")
+		// rollback the transaction
+		tx.Rollback()
+		// return the error
+		return nil, err
+	}
+	// acc_balance, err := tx.QueryRowContext(ctx, `SELECT * FROM accounts WHERE id = $1`, tx_args.FromAccountID)
 	if err != nil {
 		log.Println("Error while executing the query that checks that the sending account has the specified balance for the money transfer transaction : ", err)
 		// rollback the transaction
