@@ -17,3 +17,22 @@ type AccountRepository interface {
 	Update(int, Update_account_params) (*domain.Account, error)
 	Delete(int) error
 }
+
+type EntryRepository interface {
+	Create(*domain.Entry) error
+	GetAll() ([]*domain.Entry, error)
+	GetById(int) (*domain.Entry, error)
+	GetByAccountId(int) (*domain.Entry, error)
+	Delete(int) error
+	DeleteByAccountId(int) error
+}
+
+type TransferRepository interface {
+	Create(*domain.Transfer) error
+	GetAll() ([]*domain.Transfer, error)
+	GetById(int) (*domain.Transfer, error)
+	GetByToAccountId(int) (*domain.Transfer, error)
+	GetByFromAccountId(int) (*domain.Transfer, error)
+	GetByAccountId(int) (*domain.Transfer, error)
+	Delete(int) error
+}

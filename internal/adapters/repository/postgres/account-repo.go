@@ -8,7 +8,7 @@ import (
 )
 
 type Account_repo struct {
-	repo *postgres_repo
+	repo *Postgres_repo
 }
 
 // CREATE REQUEST
@@ -204,4 +204,8 @@ func (ar *Account_repo) Delete(id int) error {
 	}
 
 	return nil
+}
+
+func NewAccountRepo(repo *Postgres_repo) *Account_repo {
+	return &Account_repo{repo: repo}
 }

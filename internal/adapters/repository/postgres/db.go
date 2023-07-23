@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type postgres_repo struct {
+type Postgres_repo struct {
 	db *sql.DB
 }
 
@@ -22,7 +22,7 @@ type DbArgs struct {
 }
 
 // factory pattern
-func NewPostgresRepo(dsn string) (*postgres_repo, error) {
+func NewPostgresRepo(dsn string) (*Postgres_repo, error) {
 	db_args := DbArgs{
 		DbTimeOut:     3 * time.Second,
 		maxOpenDbConn: 10,
@@ -35,5 +35,5 @@ func NewPostgresRepo(dsn string) (*postgres_repo, error) {
 		return nil, err
 	}
 
-	return &postgres_repo{db: conn_pool}, nil
+	return &Postgres_repo{db: conn_pool}, nil
 }

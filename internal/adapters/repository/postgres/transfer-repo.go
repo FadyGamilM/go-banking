@@ -5,11 +5,11 @@ import (
 	"log"
 )
 
-type transfer_repo struct {
-	repo *postgres_repo
+type Transfer_repo struct {
+	repo *Postgres_repo
 }
 
-func (tr *transfer_repo) Create(transfer *domain.Transfer) error {
+func (tr *Transfer_repo) Create(transfer *domain.Transfer) error {
 	ctx, cancel := CreateContext()
 	defer cancel()
 
@@ -27,7 +27,7 @@ func (tr *transfer_repo) Create(transfer *domain.Transfer) error {
 	return nil
 }
 
-func (tr *transfer_repo) GetAll() ([]*domain.Transfer, error) {
+func (tr *Transfer_repo) GetAll() ([]*domain.Transfer, error) {
 	ctx, cancel := CreateContext()
 	defer cancel()
 
@@ -62,7 +62,7 @@ func (tr *transfer_repo) GetAll() ([]*domain.Transfer, error) {
 	return transfers, nil
 }
 
-func (tr *transfer_repo) GetById(id int) (*domain.Transfer, error) {
+func (tr *Transfer_repo) GetById(id int) (*domain.Transfer, error) {
 
 	// create ctx
 	ctx, cancel := CreateContext()
@@ -94,7 +94,7 @@ func (tr *transfer_repo) GetById(id int) (*domain.Transfer, error) {
 	return &transfer, nil
 }
 
-func (tr *transfer_repo) GetByToAccountId(to_account_id int) (*domain.Transfer, error) {
+func (tr *Transfer_repo) GetByToAccountId(to_account_id int) (*domain.Transfer, error) {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
@@ -125,7 +125,7 @@ func (tr *transfer_repo) GetByToAccountId(to_account_id int) (*domain.Transfer, 
 	return &transfer, nil
 }
 
-func (tr *transfer_repo) GetByFromAccountId(from_account_id int) (*domain.Transfer, error) {
+func (tr *Transfer_repo) GetByFromAccountId(from_account_id int) (*domain.Transfer, error) {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
@@ -156,7 +156,30 @@ func (tr *transfer_repo) GetByFromAccountId(from_account_id int) (*domain.Transf
 	return &transfer, nil
 }
 
-func (tr *transfer_repo) Delete(id int) error {
+func (tr *Transfer_repo) GetByFromAndToAccountId(from_acc_id, to_acc_id int) (*domain.Transfer, error) {
+	ctx, cancel := CreateContext()
+	defer cancel()
+
+	query := `SELECT * FROM transfers WHERE to_account = $1 AND from_account=$2`
+
+	row := tr.repo.db.QueryRowContext(ctx, query, to_acc_id, from_acc_id)
+	var transfer_record domain.Transfer
+	err := row.Scan(
+		&transfer_record.ID,
+		transfer_record.ToAccountID,
+		transfer_record.FromAccountID,
+		transfer_record.Amount,
+		transfer_record.CreatedAt,
+		transfer_record.UpdatedAt,
+	)
+	if err != nil {
+		log.Println("error while fetching transfer record from database based on to and from accounts ids : ", err)
+		return nil, err
+	}
+	return &transfer_record, nil
+}
+
+func (tr *Transfer_repo) Delete(id int) error {
 	ctx, cancel := CreateContext()
 	defer cancel()
 
@@ -171,4 +194,8 @@ func (tr *transfer_repo) Delete(id int) error {
 
 	return nil
 
+}
+
+func NewTransferRepo(repo *Postgres_repo) *Transfer_repo {
+	return &Transfer_repo{repo: repo}
 }

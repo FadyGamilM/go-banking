@@ -6,7 +6,7 @@ import (
 )
 
 type Entry_repo struct {
-	repo *postgres_repo
+	repo *Postgres_repo
 }
 
 func (er *Entry_repo) Create(entry *domain.Entry) error {
@@ -134,4 +134,8 @@ func (er *Entry_repo) DeleteByAccountId(account_id int) error {
 		return err
 	}
 	return nil
+}
+
+func NewEntryRepo(repo *Postgres_repo) *Entry_repo {
+	return &Entry_repo{repo: repo}
 }
