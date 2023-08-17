@@ -223,6 +223,31 @@ func (ar *Account_repo) GetBalanceById(id int) (*float64, error) {
 	return &balance, nil
 }
 
+// this function executes the SELECT statement with row-level locking so no other inflight transaction can update this row unless the current transaction commits
+func (ar *Account_repo) GetByIdWithRowLevelLocking(id int) (*domain.Account, error) {
+	ctx, cancel := CreateContext()
+	defer cancel()
+
+	query := `SELECT balance FROM accounts WHERE id = $1 FOR NO KEY UPDATE`
+
+	row := ar.repo.db.QueryRowContext(ctx, query, id)
+	var account *domain.Account
+	err := row.Scan(
+		&account.ID,
+		&account.OwnerName,
+		&account.Balance,
+		&account.Currency,
+		&account.CreatedAt,
+		&account.UpdatedAt,
+	)
+	if err != nil {
+		log.Println("error while mapping the db Account record to domain entity : ", err)
+		return nil, err
+	}
+
+	return account, nil
+}
+
 func NewAccountRepo(repo *Postgres_repo) *Account_repo {
 	return &Account_repo{repo: repo}
 }

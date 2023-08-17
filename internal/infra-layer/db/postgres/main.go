@@ -1,17 +1,16 @@
 package postgres
 
 import (
-	"context"
 	"database/sql"
 	"log"
 	"time"
 )
 
 type PG_DB struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
-type DbArgs struct {
+type dbArgs struct {
 	DbTimeOut     time.Duration
 	maxOpenDbConn int
 	maxIdleDbConn int
@@ -20,7 +19,7 @@ type DbArgs struct {
 
 // factory method to create a new Postgres database wrapper
 func NewPgDb(dsn string) (*PG_DB, error) {
-	dbArgs := DbArgs{
+	dbArgs := dbArgs{
 		DbTimeOut:     3 * time.Second,
 		maxOpenDbConn: 10,
 		maxIdleDbConn: 5,
@@ -32,7 +31,7 @@ func NewPgDb(dsn string) (*PG_DB, error) {
 		return nil, err
 	}
 
-	return &PG_DB{db: conn_pool}, nil
+	return &PG_DB{DB: conn_pool}, nil
 }
 
 // function to test the connection before applying the connection
@@ -50,7 +49,7 @@ func testDB(db *sql.DB) error {
 }
 
 // function to perform the actuall connection
-func connectToPostgresInstance(DSN string, args DbArgs) (*sql.DB, error) {
+func connectToPostgresInstance(DSN string, args dbArgs) (*sql.DB, error) {
 	// open a pool of connections
 	pool_of_conn, err := sql.Open("pgx", DSN)
 	if err != nil {
@@ -69,10 +68,4 @@ func connectToPostgresInstance(DSN string, args DbArgs) (*sql.DB, error) {
 	}
 	// return the response
 	return pool_of_conn, nil
-}
-
-func CreateContext() (context.Context, context.CancelFunc) {
-	// define context
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	return ctx, cancel
 }
