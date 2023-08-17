@@ -31,3 +31,45 @@ Backend service for bank application.
 
 
 
+├── Dockerfile
+├── cmd
+│   └── runner.go
+├── conf
+│   └── app.yaml
+├── internal
+│   ├── controller
+│   │   └── controller.go
+│   ├── core
+│   │   ├── common
+│   │   │   ├── router
+│   │   │   │   └── router.go
+│   │   │   └── utils
+│   │   │       └── logger.go
+│   │   ├── dto
+│   │   │   └── user.go
+│   │   ├── entity
+│   │   ├── model
+│   │   │   ├── request
+│   │   │   │   └── request.go
+│   │   │   └── response
+│   │   │       └── response.go
+│   │   ├── port
+│   │   │   ├── repository
+│   │   │   │   ├── db.go
+│   │   │   │   └── user.go
+│   │   │   └── service
+│   │   │       └── user.go
+│   │   ├── server
+│   │   │   └── http_server.go
+│   │   └── service
+│   │       └── user.go
+│   └── infra
+│       ├── config
+│       │   └── config.go
+│       └── repository
+│           ├── db.go
+│           └── user.go
+├── schema
+│   └── schema.sql
+└── script
+    └── run.sh
