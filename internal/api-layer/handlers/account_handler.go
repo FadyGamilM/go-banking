@@ -7,5 +7,3 @@ import (
 type AccountHandler struct {
 	UserService *accounts.AccountService
 }
-
-func (h *AccountHandler) CreateAccount() {}
