@@ -65,7 +65,7 @@ const (
 )
 
 // Create new Account
-func (pg_acc *PG_AccountRepository) Create(acc *domain.Account) (*domain.Account, error) {
+func (repo *PG_AccountRepository) Create(acc *domain.Account) (*domain.Account, error) {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
@@ -74,7 +74,7 @@ func (pg_acc *PG_AccountRepository) Create(acc *domain.Account) (*domain.Account
 	acc_db := new(models.PgAccount)
 
 	// execute query and scan result
-	err := pg_acc.pg.DB.QueryRowContext(ctx, create_Query, acc.OwnerName, acc.Balance, acc.Currency).Scan(&acc_db.ID, &acc_db.OwnerName, &acc_db.Balance, &acc_db.Currency, &acc_db.Activated, &acc_db.CreatedAt, &acc_db.UpdatedAt)
+	err := repo.pg.DB.QueryRowContext(ctx, create_Query, acc.OwnerName, acc.Balance, acc.Currency).Scan(&acc_db.ID, &acc_db.OwnerName, &acc_db.Balance, &acc_db.Currency, &acc_db.Activated, &acc_db.CreatedAt, &acc_db.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -87,13 +87,13 @@ func (pg_acc *PG_AccountRepository) Create(acc *domain.Account) (*domain.Account
 }
 
 // get all accounts
-func (pg_acc *PG_AccountRepository) GetAll() ([]*domain.Account, error) {
+func (repo *PG_AccountRepository) GetAll() ([]*domain.Account, error) {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
 
 	// execute query
-	rows, err := pg_acc.pg.DB.QueryContext(ctx, get_All_Query)
+	rows, err := repo.pg.DB.QueryContext(ctx, get_All_Query)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -124,14 +124,14 @@ func (pg_acc *PG_AccountRepository) GetAll() ([]*domain.Account, error) {
 	return domain_accounts, nil
 }
 
-func (pg_acc *PG_AccountRepository) GetByID(id int64) (*domain.Account, error) {
+func (repo *PG_AccountRepository) GetByID(id int64) (*domain.Account, error) {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
 
 	// define database entity type to scan the query result
 	db_account := new(models.PgAccount)
-	err := pg_acc.pg.DB.QueryRowContext(ctx, get_By_ID_Query, id).Scan(
+	err := repo.pg.DB.QueryRowContext(ctx, get_By_ID_Query, id).Scan(
 		&db_account.ID,
 		&db_account.OwnerName,
 		&db_account.Balance,
@@ -150,14 +150,14 @@ func (pg_acc *PG_AccountRepository) GetByID(id int64) (*domain.Account, error) {
 	return domain_account, nil
 }
 
-func (pg_acc *PG_AccountRepository) GetByOwnerName(owner string) (*domain.Account, error) {
+func (repo *PG_AccountRepository) GetByOwnerName(owner string) (*domain.Account, error) {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
 
 	// define database entity type to scan the query result
 	db_account := new(models.PgAccount)
-	err := pg_acc.pg.DB.QueryRowContext(ctx, get_By_OwnerName_Query, owner).Scan(
+	err := repo.pg.DB.QueryRowContext(ctx, get_By_OwnerName_Query, owner).Scan(
 		&db_account.ID,
 		&db_account.OwnerName,
 		&db_account.Balance,
@@ -176,12 +176,12 @@ func (pg_acc *PG_AccountRepository) GetByOwnerName(owner string) (*domain.Accoun
 	return domain_account, nil
 }
 
-func (pg_acc *PG_AccountRepository) DeleteByID(id int64) error {
+func (repo *PG_AccountRepository) DeleteByID(id int64) error {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
 
-	_, err := pg_acc.pg.DB.ExecContext(ctx, delete_By_ID_Query, id)
+	_, err := repo.pg.DB.ExecContext(ctx, delete_By_ID_Query, id)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -189,14 +189,14 @@ func (pg_acc *PG_AccountRepository) DeleteByID(id int64) error {
 	return nil
 }
 
-func (pg_acc *PG_AccountRepository) UpdateByID(id int64, updatedBalance float64) (*domain.Account, error) {
+func (repo *PG_AccountRepository) UpdateByID(id int64, updatedBalance float64) (*domain.Account, error) {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
 
 	db_acc := new(models.PgAccount)
 
-	err := pg_acc.pg.DB.QueryRowContext(ctx, update_Balance_By_id_Query, updatedBalance, id).Scan(&db_acc.ID, &db_acc.OwnerName, &db_acc.Balance, &db_acc.Currency, &db_acc.Activated, &db_acc.CreatedAt, &db_acc.UpdatedAt)
+	err := repo.pg.DB.QueryRowContext(ctx, update_Balance_By_id_Query, updatedBalance, id).Scan(&db_acc.ID, &db_acc.OwnerName, &db_acc.Balance, &db_acc.Currency, &db_acc.Activated, &db_acc.CreatedAt, &db_acc.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err
