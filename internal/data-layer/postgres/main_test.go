@@ -10,6 +10,7 @@ import (
 
 // create global instance of the PG_DB object which is used to execute queries
 var test_PG_DB *postgres.PG_DB
+var test_acc_repo *PG_AccountRepository
 
 func TestMain(m *testing.M) {
 	// get a connection to postgres database
@@ -32,6 +33,8 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("error trying to ping to the test db : %v \n", err)
 	}
+
+	test_acc_repo = NewPG_AccountRepo(test_PG_DB)
 
 	os.Exit(m.Run())
 }

@@ -11,27 +11,37 @@ type PG_AccountRepository struct {
 	pg *postgres.PG_DB
 }
 
+// type Config struct {
+// 	pg *postgres.PG_DB
+// }
+
+func NewPG_AccountRepo(pg *postgres.PG_DB) *PG_AccountRepository {
+	return &PG_AccountRepository{
+		pg: pg,
+	}
+}
+
 const (
 	create_Query = `
 		INSERT INTO accounts (owner_name, balance, currency)
 		VALUES 
 		($1, $2, $3)
-		RETURNING id, owner_name, balance, currency, deleted, created_at, updated_at
+		RETURNING id, owner_name, balance, currency, activated, created_at, updated_at
 	`
 
 	get_All_Query = `
-		SELECT id, owner_name, balance, currency, deleted, created_at, updated_at
+		SELECT id, owner_name, balance, currency, activated, created_at, updated_at
 		FROM accounts
 	`
 
 	get_By_ID_Query = `
-		SELECT id, owner_name, balance, currency, deleted, created_at, updated_at
+		SELECT id, owner_name, balance, currency, activated, created_at, updated_at
 		FROM accounts
 		WHERE id = $1
 	`
 
 	get_By_OwnerName_Query = `
-		SELECT id, owner_name, balance, currency, deleted, created_at, updated_at
+		SELECT id, owner_name, balance, currency, activated, created_at, updated_at
 		FROM accounts
 		WHERE owner_name = $1
 	`
@@ -57,7 +67,7 @@ func (pg_acc *PG_AccountRepository) Create(acc *domain.Account) (*domain.Account
 	acc_db := new(models.PgAccount)
 
 	// execute query and scan result
-	err := pg_acc.pg.DB.QueryRowContext(ctx, create_Query, acc.OwnerName, acc.Balance, acc.Currency).Scan(&acc_db)
+	err := pg_acc.pg.DB.QueryRowContext(ctx, create_Query, acc.OwnerName, acc.Balance, acc.Currency).Scan(&acc_db.ID, &acc_db.OwnerName, &acc_db.Balance, &acc_db.Currency, &acc_db.Activated, &acc_db.CreatedAt, &acc_db.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err

@@ -7,17 +7,13 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_timestamp_accounts
-BEFORE UPDATE ON accounts
-FOR EACH ROW
-EXECUTE PROCEDURE update_timestamp_column();
 
 CREATE TABLE accounts (
   id BIGSERIAL PRIMARY KEY,
   owner_name VARCHAR(100) NOT NULL,
   balance DECIMAL NOT NULL CHECK(balance > 0.0),
   currency VARCHAR(10) NOT NULL,
-  deleted BOOLEAN NOT NULL DEFAULT false,
+  activated BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );
@@ -33,11 +29,6 @@ CREATE TABLE IF NOT EXISTS entries(
 );
 
 
-CREATE TRIGGER update_timestamp_entries
-BEFORE UPDATE ON entries
-FOR EACH ROW
-EXECUTE PROCEDURE update_timestamp_column();
-
 
 CREATE TABLE IF NOT EXISTS transfers(
 	id BIGSERIAL PRIMARY KEY,
@@ -49,13 +40,26 @@ CREATE TABLE IF NOT EXISTS transfers(
 );
 
 
+create INDEX on accounts(id);
+create INDEX on entries(account_id);
+create INDEX on transfers(to_account);
+create INDEX on transfers(from_account);
+create INDEX on transfers(to_account, from_account);
+
+
+CREATE TRIGGER update_timestamp_accounts
+BEFORE UPDATE ON accounts
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp_column();
+
+
 CREATE TRIGGER update_timestamp_transfers
 BEFORE UPDATE ON transfers
 FOR EACH ROW
 EXECUTE PROCEDURE update_timestamp_column();
 
-create INDEX on accounts(id);
-create INDEX on entries(AccountId);
-create INDEX on transfers(ToAccount);
-create INDEX on transfers(FromAccount);
-create INDEX on transfers(ToAccount, FromAccount);
+CREATE TRIGGER update_timestamp_entries
+BEFORE UPDATE ON entries
+FOR EACH ROW
+EXECUTE PROCEDURE update_timestamp_column();
+

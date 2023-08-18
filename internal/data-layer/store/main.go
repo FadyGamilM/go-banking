@@ -1,13 +1,13 @@
 package store
 
 import (
-	ports "gobanking/internal/core-layer/ports/accounts"
-	ports "gobanking/internal/core-layer/ports/entries"
-	ports "gobanking/internal/core-layer/ports/transfers"
+	account_ports "gobanking/internal/core-layer/ports/accounts"
+	entry_ports "gobanking/internal/core-layer/ports/entries"
+	transfer_ports "gobanking/internal/core-layer/ports/transfers"
 )
 
 type DataStore struct {
-	Account  *ports.AccountRepository
-	Entry    *ports.EntryRepository
-	Transfer *ports.TransferRepository
+	Account  *account_ports.AccountRepository
+	Entry    *entry_ports.EntryRepository
+	Transfer *transfer_ports.TransferRepository
 }

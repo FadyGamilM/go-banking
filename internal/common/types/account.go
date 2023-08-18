@@ -13,7 +13,7 @@ type CreateAccountResponse struct {
 	OwnerName string    `json:"owner_name"`
 	Balance   float64   `json:"balance"`
 	Currency  string    `json:"currency"`
-	Deleted   bool      `json:"deleted"`
+	Activated bool      `json:"activated"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -23,7 +23,7 @@ type GetAccountResponse struct {
 	OwnerName string    `json:"owner_name"`
 	Balance   float64   `json:"balance"`
 	Currency  string    `json:"currency"`
-	Deleted   bool      `json:"deleted"`
+	Activated bool      `json:"activated"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
