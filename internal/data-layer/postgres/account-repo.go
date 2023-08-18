@@ -55,6 +55,13 @@ const (
 		DELETE FROM accounts 
 		WHERE owner_name = $1
 	`
+
+	update_Balance_By_id_Query = `
+		UPDATE accounts 
+		SET balance = $1 
+		WHERE id = $2
+		RETURNING id, owner_name, balance, currency, activated, created_at, updated_at 
+	`
 )
 
 // Create new Account
@@ -180,4 +187,22 @@ func (pg_acc *PG_AccountRepository) DeleteByID(id int64) error {
 		return err
 	}
 	return nil
+}
+
+func (pg_acc *PG_AccountRepository) UpdateByID(id int64, updatedBalance float64) (*domain.Account, error) {
+	// create ctx
+	ctx, cancel := CreateContext()
+	defer cancel()
+
+	db_acc := new(models.PgAccount)
+
+	err := pg_acc.pg.DB.QueryRowContext(ctx, update_Balance_By_id_Query, updatedBalance, id).Scan(&db_acc.ID, &db_acc.OwnerName, &db_acc.Balance, &db_acc.Currency, &db_acc.Activated, &db_acc.CreatedAt, &db_acc.UpdatedAt)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	domain_acc := db_acc.ToDomainEntity()
+
+	return domain_acc, nil
 }

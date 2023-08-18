@@ -8,4 +8,5 @@ type AccountRepository interface {
 	GetByID(int64) (*domain.Account, error)
 	GetByOwnerName(string) (*domain.Account, error)
 	DeleteByID(int64) error
+	UpdateByID(int64, float64) (*domain.Account, error)
 }
