@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createUserForTest(req_args *domain.Account) (*domain.Account, error) {
+func createAccountForTest(req_args *domain.Account) (*domain.Account, error) {
 
 	created_acc, err := test_acc_repo.Create(req_args)
 
@@ -24,7 +24,7 @@ func TestCreateAccount(t *testing.T) {
 		Currency:  "USD",
 	}
 
-	created_acc, err := createUserForTest(&req_args)
+	created_acc, err := createAccountForTest(&req_args)
 
 	// now we need to check that
 
@@ -48,7 +48,7 @@ func TestGetAccountByID(t *testing.T) {
 		Currency:  "USD",
 	}
 
-	created_acc, err := createUserForTest(&req_args)
+	created_acc, err := createAccountForTest(&req_args)
 
 	require.NoError(t, err)
 
@@ -84,10 +84,10 @@ func TestGetAllAccounts(t *testing.T) {
 		Currency:  "USD",
 	}
 
-	_, err := createUserForTest(&req_args_1)
+	_, err := createAccountForTest(&req_args_1)
 	require.NoError(t, err)
 
-	_, err = createUserForTest(&req_args_2)
+	_, err = createAccountForTest(&req_args_2)
 
 	require.NoError(t, err)
 
@@ -109,7 +109,7 @@ func TestDeleteAccountByID(t *testing.T) {
 		Currency:  "USD",
 	}
 
-	created_acc, err := createUserForTest(&req_args)
+	created_acc, err := createAccountForTest(&req_args)
 
 	// - No errors
 	require.NoError(t, err)
@@ -142,7 +142,7 @@ func TestUpdateAccountByID(t *testing.T) {
 		Currency:  "USD",
 	}
 
-	created_acc, err := createUserForTest(&req_args)
+	created_acc, err := createAccountForTest(&req_args)
 
 	// - No errors
 	require.NoError(t, err)

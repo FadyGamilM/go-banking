@@ -2,7 +2,7 @@ package domain
 
 import "time"
 
-type AccountEntry struct {
+type Entry struct {
 	ID        int64
 	AccountID int64
 	Amount    float64

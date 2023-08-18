@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"fmt"
 	"gobanking/internal/core-layer/domain"
 	"gobanking/internal/data-layer/postgres/models"
 	"gobanking/internal/infra-layer/db/postgres"
@@ -61,6 +62,12 @@ const (
 		SET balance = $1 
 		WHERE id = $2
 		RETURNING id, owner_name, balance, currency, activated, created_at, updated_at 
+	`
+
+	get_Account_Balance_Query = `
+		SELECT balance
+		FROM accounts 
+		WHERE id = $1
 	`
 )
 
@@ -189,14 +196,34 @@ func (repo *PG_AccountRepository) DeleteByID(id int64) error {
 	return nil
 }
 
-func (repo *PG_AccountRepository) UpdateByID(id int64, updatedBalance float64) (*domain.Account, error) {
+func (repo *PG_AccountRepository) UpdateByID(id int64, updateAmount float64) (*domain.Account, error) {
 	// create ctx
 	ctx, cancel := CreateContext()
 	defer cancel()
 
 	db_acc := new(models.PgAccount)
 
-	err := repo.pg.DB.QueryRowContext(ctx, update_Balance_By_id_Query, updatedBalance, id).Scan(&db_acc.ID, &db_acc.OwnerName, &db_acc.Balance, &db_acc.Currency, &db_acc.Activated, &db_acc.CreatedAt, &db_acc.UpdatedAt)
+	// In case that the updateAmount is negative (withdraw operation) we need to validate that the account has at least a balance >= the updateAmount
+	var current_balance float64
+	err := repo.pg.DB.QueryRowContext(ctx, get_Account_Balance_Query, id).Scan(&current_balance)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	log.Println("amoutn to be withdrawn or deposited is : ", updateAmount)
+
+	if updateAmount < 0 {
+		log.Println("yeeeeee 1")
+		log.Println(current_balance)
+		log.Println(-1 * updateAmount)
+		if current_balance <= updateAmount*-1 {
+			log.Println("yeeeeee 2")
+			return nil, fmt.Errorf("account balance is less than the amount you want to withdraw, balance is : %v ", current_balance)
+		}
+	}
+
+	// update the balance to be equale the old balance + (-/+ Amount)
+	err = repo.pg.DB.QueryRowContext(ctx, update_Balance_By_id_Query, updateAmount+current_balance, id).Scan(&db_acc.ID, &db_acc.OwnerName, &db_acc.Balance, &db_acc.Currency, &db_acc.Activated, &db_acc.CreatedAt, &db_acc.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err

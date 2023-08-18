@@ -11,13 +11,19 @@ type PG_EntryRepository struct {
 	pg *postgres.PG_DB
 }
 
+func NewPG_EntryRepo(pg *postgres.PG_DB) *PG_EntryRepository {
+	return &PG_EntryRepository{
+		pg: pg,
+	}
+}
+
 const (
 	create_Entry_For_Account_Query = `
 		INSERT INTO entries 
 		(account_id, amount)
 		VALUES
 		($1, $2)
-		RETTURNING id, account_id, amount, created_at, updated_at
+		RETURNING id, account_id, amount, created_at, updated_at
 	`
 
 	get_All_Entries_Of_Account_Query = `
@@ -34,7 +40,7 @@ const (
 )
 
 // given the account id, create an entry for this account
-func (repo *PG_EntryRepository) CreateEntry(domain_entry *domain.Entry) (*domain.Entry, error) {
+func (repo *PG_EntryRepository) Create(domain_entry *domain.Entry) (*domain.Entry, error) {
 	ctx, cancel := CreateContext()
 	defer cancel()
 

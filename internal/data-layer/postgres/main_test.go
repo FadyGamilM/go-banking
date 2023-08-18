@@ -11,6 +11,7 @@ import (
 // create global instance of the PG_DB object which is used to execute queries
 var test_PG_DB *postgres.PG_DB
 var test_acc_repo *PG_AccountRepository
+var test_entry_repo *PG_EntryRepository
 
 func TestMain(m *testing.M) {
 	// get a connection to postgres database
@@ -35,6 +36,7 @@ func TestMain(m *testing.M) {
 	}
 
 	test_acc_repo = NewPG_AccountRepo(test_PG_DB)
+	test_entry_repo = NewPG_EntryRepo(test_PG_DB)
 
 	os.Exit(m.Run())
 }
