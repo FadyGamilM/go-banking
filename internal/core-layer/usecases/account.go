@@ -20,9 +20,10 @@ func NewAccountService(c *Config) *accountService {
 	}
 }
 
-func (as *accountService) Create(req *types.CreateAccountRequest) (types.CreateAccountResponse, error) {
+func (as *accountService) Create(req *types.CreateAccountRequest) (*types.CreateAccountResponse, error) {
+	return nil, nil
 }
 
 func (as *accountService) GetAll() ([]*types.GetAccountResponse, error)          { return nil, nil }
-func (as *accountService) GetById(id int64) ([]*types.GetAccountResponse, error) {}
-func (as *accountService) DeleteById(id int64) error                             {}
+func (as *accountService) GetById(id int64) ([]*types.GetAccountResponse, error) { return nil, nil }
+func (as *accountService) DeleteById(id int64) error                             { return nil }

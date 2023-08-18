@@ -1,3 +1,3 @@
 package entries
 
-type AccountEntryRepository interface{}
+type EntryRepository interface{}

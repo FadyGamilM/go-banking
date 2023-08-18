@@ -4,6 +4,11 @@ import (
 	"database/sql"
 	"log"
 	"time"
+
+	_ "github.com/jackc/pgconn"
+	_ "github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/v4/stdlib"
+	_ "github.com/lib/pq"
 )
 
 type PG_DB struct {
@@ -66,6 +71,7 @@ func connectToPostgresInstance(DSN string, args dbArgs) (*sql.DB, error) {
 	if ping_conn_err != nil {
 		return nil, ping_conn_err
 	}
+
 	// return the response
 	return pool_of_conn, nil
 }
