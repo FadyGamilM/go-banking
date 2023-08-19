@@ -70,6 +70,9 @@ func (repo *PG_TransferRepository) GetAll() ([]*domain.Transfer, error) {
 			&db_transfer.CreatedAt,
 			&db_transfer.UpdatedAt,
 		)
+		if err != nil {
+			return nil, err
+		}
 		domain_transfers = append(domain_transfers, db_transfer.ToDomainEntity())
 	}
 
