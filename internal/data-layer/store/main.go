@@ -11,3 +11,11 @@ type DataStore struct {
 	Entry    *entry_ports.EntryRepository
 	Transfer *transfer_ports.TransferRepository
 }
+
+func NewDataStore(acc *account_ports.AccountRepository, entry *entry_ports.EntryRepository, transfer *transfer_ports.TransferRepository) *DataStore {
+	return &DataStore{
+		Account:  acc,
+		Entry:    entry,
+		Transfer: transfer,
+	}
+}
