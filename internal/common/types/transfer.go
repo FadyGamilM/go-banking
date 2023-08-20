@@ -24,6 +24,7 @@ type GetTransferResponse struct {
 	Amount        float64   `json:"currency"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
+<<<<<<< HEAD
 }
 
 type TransferMoneyTransactionParam struct {
@@ -36,4 +37,6 @@ type TransferMoneyTransactionResult struct {
 	ToAccountID   int64   `json:"to_account_id"`
 	FromAccountID int64   `json:"from_account_id"`
 	Amount        float64 `json:"currency"`
+=======
+>>>>>>> b358ac80580b9f2601913429f7976c3b093b3efa
 }
