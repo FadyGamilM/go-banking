@@ -8,12 +8,12 @@ import (
 )
 
 type PG_EntryRepository struct {
-	pg *postgres.PG_DB
+	pg_tx *postgres.PG_TX
 }
 
-func NewPG_EntryRepo(pg *postgres.PG_DB) *PG_EntryRepository {
+func NewPG_EntryRepo(tx *postgres.PG_TX) *PG_EntryRepository {
 	return &PG_EntryRepository{
-		pg: pg,
+		pg_tx: tx,
 	}
 }
 
@@ -46,7 +46,7 @@ func (repo *PG_EntryRepository) Create(domain_entry *domain.Entry) (*domain.Entr
 
 	db_entry := new(models.PgEntry)
 
-	err := repo.pg.DB.QueryRowContext(ctx, create_Entry_For_Account_Query, domain_entry.AccountID, domain_entry.Amount).Scan(&db_entry.ID, &db_entry.AccountID, &db_entry.Amount, &db_entry.CreatedAt, &db_entry.UpdatedAt)
+	err := repo.pg_tx.TX.QueryRowContext(ctx, create_Entry_For_Account_Query, domain_entry.AccountID, domain_entry.Amount).Scan(&db_entry.ID, &db_entry.AccountID, &db_entry.Amount, &db_entry.CreatedAt, &db_entry.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -62,7 +62,7 @@ func (repo *PG_EntryRepository) GetAll(accID int64) ([]*domain.Entry, error) {
 	ctx, cancel := CreateContext()
 	defer cancel()
 
-	rows, err := repo.pg.DB.QueryContext(ctx, get_All_Entries_Of_Account_Query, accID)
+	rows, err := repo.pg_tx.TX.QueryContext(ctx, get_All_Entries_Of_Account_Query, accID)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -93,7 +93,7 @@ func (repo *PG_EntryRepository) GetOne(entryID int64, accID int64) (*domain.Entr
 	defer cancel()
 
 	db_entry := new(models.PgEntry)
-	err := repo.pg.DB.QueryRowContext(ctx, get_Entry_By_Entry_And_Account_IDs_Query, entryID, accID).Scan(&db_entry.ID, &db_entry.AccountID, &db_entry.Amount, &db_entry.CreatedAt, &db_entry.UpdatedAt)
+	err := repo.pg_tx.TX.QueryRowContext(ctx, get_Entry_By_Entry_And_Account_IDs_Query, entryID, accID).Scan(&db_entry.ID, &db_entry.AccountID, &db_entry.Amount, &db_entry.CreatedAt, &db_entry.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err

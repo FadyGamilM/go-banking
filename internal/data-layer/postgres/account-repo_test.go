@@ -17,6 +17,10 @@ func createAccountForTest(req_args *domain.Account) (*domain.Account, error) {
 }
 
 func TestCreateAccount(t *testing.T) {
+	// teardown the database to start clean
+	test_PG_TX.TX.Exec(`DELETE FROM entries`)
+	test_PG_TX.TX.Exec(`DELETE FROM transfers`)
+	test_PG_TX.TX.Exec(`DELETE FROM accounts`)
 
 	req_args := domain.Account{
 		OwnerName: "fady",
@@ -42,6 +46,11 @@ func TestCreateAccount(t *testing.T) {
 }
 
 func TestGetAccountByID(t *testing.T) {
+	// teardown the database to start clean
+	test_PG_TX.TX.Exec(`DELETE FROM entries`)
+	test_PG_TX.TX.Exec(`DELETE FROM transfers`)
+	test_PG_TX.TX.Exec(`DELETE FROM accounts`)
+
 	req_args := domain.Account{
 		OwnerName: "ahmed",
 		Balance:   float64(100.00),
@@ -69,8 +78,12 @@ func TestGetAccountByID(t *testing.T) {
 }
 
 func TestGetAllAccounts(t *testing.T) {
+	// teardown the database to start clean
+	test_PG_TX.TX.Exec(`DELETE FROM entries`)
+	test_PG_TX.TX.Exec(`DELETE FROM transfers`)
+	test_PG_TX.TX.Exec(`DELETE FROM accounts`)
 
-	test_acc_repo.pg.DB.Exec(`DELETE FROM accounts`)
+	test_acc_repo.pg_tx.TX.Exec(`DELETE FROM accounts`)
 
 	req_args_1 := domain.Account{
 		OwnerName: "ahmed",
@@ -101,7 +114,12 @@ func TestGetAllAccounts(t *testing.T) {
 }
 
 func TestDeleteAccountByID(t *testing.T) {
-	test_acc_repo.pg.DB.Exec(`DELETE FROM accounts`)
+	// teardown the database to start clean
+	test_PG_TX.TX.Exec(`DELETE FROM entries`)
+	test_PG_TX.TX.Exec(`DELETE FROM transfers`)
+	test_PG_TX.TX.Exec(`DELETE FROM accounts`)
+
+	test_acc_repo.pg_tx.TX.Exec(`DELETE FROM accounts`)
 
 	req_args := domain.Account{
 		OwnerName: "ahmed",
@@ -134,7 +152,12 @@ func TestDeleteAccountByID(t *testing.T) {
 }
 
 func TestUpdateAccountByID(t *testing.T) {
-	test_acc_repo.pg.DB.Exec(`DELETE FROM accounts`)
+	// teardown the database to start clean
+	test_PG_TX.TX.Exec(`DELETE FROM entries`)
+	test_PG_TX.TX.Exec(`DELETE FROM transfers`)
+	test_PG_TX.TX.Exec(`DELETE FROM accounts`)
+
+	test_acc_repo.pg_tx.TX.Exec(`DELETE FROM accounts`)
 
 	req_args := domain.Account{
 		OwnerName: "ahmed",
@@ -157,11 +180,12 @@ func TestUpdateAccountByID(t *testing.T) {
 	require.Equal(t, true, created_acc.Activated)
 
 	balanceUpdate := float64(200.0)
-	updated_acc, err := test_acc_repo.UpdateByID(created_acc.ID, created_acc.Balance+balanceUpdate)
+	// when we need to update the balance we send the value to be added or removed from the current balance and the repo will handle the addition or subtraction operation
+	updated_acc, err := test_acc_repo.UpdateByID(created_acc.ID, balanceUpdate)
 
 	// test that the balance is not the same and the right value is updated
 	require.NoError(t, err)            // no errors
 	require.NotZero(t, created_acc.ID) // id still the same and record still in db
 	require.NotEqual(t, created_acc.Balance, updated_acc.Balance)
-	require.Equal(t, updated_acc.Balance, created_acc.Balance+balanceUpdate)
+	require.Equal(t, created_acc.Balance+balanceUpdate, updated_acc.Balance)
 }

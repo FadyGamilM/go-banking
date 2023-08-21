@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"fmt"
 	"gobanking/internal/infra-layer/db/postgres"
 	"log"
@@ -10,12 +11,17 @@ import (
 
 // create global instance of the PG_DB object which is used to execute queries
 var test_PG_DB *postgres.PG_DB
+var test_PG_TX *postgres.PG_TX
 var test_acc_repo *PG_AccountRepository
 var test_entry_repo *PG_EntryRepository
 var test_transfer_Repo *PG_TransferRepository
 
+// func init() {
+// 	test_PG_DB = *postgres.PG_DB{}
+// }
+
 func TestMain(m *testing.M) {
-	// get a connection to postgres database
+	// initiate
 
 	// Replace these values with your PostgreSQL container settings
 	host := "127.0.0.1" // Use the container IP if needed
@@ -36,9 +42,15 @@ func TestMain(m *testing.M) {
 		log.Fatalf("error trying to ping to the test db : %v \n", err)
 	}
 
-	test_acc_repo = NewPG_AccountRepo(test_PG_DB)
-	test_entry_repo = NewPG_EntryRepo(test_PG_DB)
-	test_transfer_Repo = NewPG_TransferRepo(test_PG_DB)
+	// instantiate a new transaction
+	tx, err := test_PG_DB.DB.BeginTx(context.Background(), nil)
+	if err != nil {
+		log.Fatalf("error trying to begin a transaction : %v \n", err)
+	}
+	test_PG_TX = &postgres.PG_TX{TX: tx}
+	test_acc_repo = NewPG_AccountRepo(test_PG_TX)
+	test_entry_repo = NewPG_EntryRepo(test_PG_TX)
+	test_transfer_Repo = NewPG_TransferRepo(test_PG_TX)
 
 	os.Exit(m.Run())
 }

@@ -15,6 +15,10 @@ type PG_DB struct {
 	DB *sql.DB
 }
 
+type PG_TX struct {
+	TX *sql.Tx
+}
+
 type dbArgs struct {
 	DbTimeOut     time.Duration
 	maxOpenDbConn int

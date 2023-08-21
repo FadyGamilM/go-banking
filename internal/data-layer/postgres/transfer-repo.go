@@ -7,12 +7,12 @@ import (
 )
 
 type PG_TransferRepository struct {
-	pg *postgres.PG_DB
+	pg_tx *postgres.PG_TX
 }
 
-func NewPG_TransferRepo(pg *postgres.PG_DB) *PG_TransferRepository {
+func NewPG_TransferRepo(tx *postgres.PG_TX) *PG_TransferRepository {
 	return &PG_TransferRepository{
-		pg: pg,
+		pg_tx: tx,
 	}
 }
 
@@ -42,7 +42,7 @@ func (repo *PG_TransferRepository) Create(domain_transfer *domain.Transfer) (*do
 	defer cancel()
 
 	db_transfer := new(models.PgTransfer)
-	err := repo.pg.DB.QueryRowContext(ctx, create_Transfer_Query, domain_transfer.ToAccountID, domain_transfer.FromAccountID, domain_transfer.Amount).Scan(&db_transfer.ID, &db_transfer.ToAccountID, &db_transfer.FromAccountID, &db_transfer.Amount, &db_transfer.CreatedAt, &db_transfer.UpdatedAt)
+	err := repo.pg_tx.TX.QueryRowContext(ctx, create_Transfer_Query, domain_transfer.ToAccountID, domain_transfer.FromAccountID, domain_transfer.Amount).Scan(&db_transfer.ID, &db_transfer.ToAccountID, &db_transfer.FromAccountID, &db_transfer.Amount, &db_transfer.CreatedAt, &db_transfer.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (repo *PG_TransferRepository) GetAll() ([]*domain.Transfer, error) {
 	defer cancel()
 
 	var domain_transfers []*domain.Transfer
-	rows, err := repo.pg.DB.QueryContext(ctx, get_All_Transfers_Query)
+	rows, err := repo.pg_tx.TX.QueryContext(ctx, get_All_Transfers_Query)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (repo *PG_TransferRepository) GetByID(id int64) (*domain.Transfer, error) {
 	defer cancel()
 
 	db_transfer := new(models.PgTransfer)
-	err := repo.pg.DB.QueryRowContext(ctx, get_Transfer_By_ID_Query, id).Scan(&db_transfer.ID, &db_transfer.ToAccountID, &db_transfer.FromAccountID, &db_transfer.Amount, &db_transfer.CreatedAt, &db_transfer.UpdatedAt)
+	err := repo.pg_tx.TX.QueryRowContext(ctx, get_Transfer_By_ID_Query, id).Scan(&db_transfer.ID, &db_transfer.ToAccountID, &db_transfer.FromAccountID, &db_transfer.Amount, &db_transfer.CreatedAt, &db_transfer.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}

@@ -9,16 +9,12 @@ import (
 )
 
 type PG_AccountRepository struct {
-	pg *postgres.PG_DB
+	pg_tx *postgres.PG_TX
 }
 
-// type Config struct {
-// 	pg *postgres.PG_DB
-// }
-
-func NewPG_AccountRepo(pg *postgres.PG_DB) *PG_AccountRepository {
+func NewPG_AccountRepo(tx *postgres.PG_TX) *PG_AccountRepository {
 	return &PG_AccountRepository{
-		pg: pg,
+		pg_tx: tx,
 	}
 }
 
@@ -81,7 +77,7 @@ func (repo *PG_AccountRepository) Create(acc *domain.Account) (*domain.Account, 
 	acc_db := new(models.PgAccount)
 
 	// execute query and scan result
-	err := repo.pg.DB.QueryRowContext(ctx, create_Query, acc.OwnerName, acc.Balance, acc.Currency).Scan(&acc_db.ID, &acc_db.OwnerName, &acc_db.Balance, &acc_db.Currency, &acc_db.Activated, &acc_db.CreatedAt, &acc_db.UpdatedAt)
+	err := repo.pg_tx.TX.QueryRowContext(ctx, create_Query, acc.OwnerName, acc.Balance, acc.Currency).Scan(&acc_db.ID, &acc_db.OwnerName, &acc_db.Balance, &acc_db.Currency, &acc_db.Activated, &acc_db.CreatedAt, &acc_db.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -100,7 +96,7 @@ func (repo *PG_AccountRepository) GetAll() ([]*domain.Account, error) {
 	defer cancel()
 
 	// execute query
-	rows, err := repo.pg.DB.QueryContext(ctx, get_All_Query)
+	rows, err := repo.pg_tx.TX.QueryContext(ctx, get_All_Query)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -138,7 +134,7 @@ func (repo *PG_AccountRepository) GetByID(id int64) (*domain.Account, error) {
 
 	// define database entity type to scan the query result
 	db_account := new(models.PgAccount)
-	err := repo.pg.DB.QueryRowContext(ctx, get_By_ID_Query, id).Scan(
+	err := repo.pg_tx.TX.QueryRowContext(ctx, get_By_ID_Query, id).Scan(
 		&db_account.ID,
 		&db_account.OwnerName,
 		&db_account.Balance,
@@ -164,7 +160,7 @@ func (repo *PG_AccountRepository) GetByOwnerName(owner string) (*domain.Account,
 
 	// define database entity type to scan the query result
 	db_account := new(models.PgAccount)
-	err := repo.pg.DB.QueryRowContext(ctx, get_By_OwnerName_Query, owner).Scan(
+	err := repo.pg_tx.TX.QueryRowContext(ctx, get_By_OwnerName_Query, owner).Scan(
 		&db_account.ID,
 		&db_account.OwnerName,
 		&db_account.Balance,
@@ -188,7 +184,7 @@ func (repo *PG_AccountRepository) DeleteByID(id int64) error {
 	ctx, cancel := CreateContext()
 	defer cancel()
 
-	_, err := repo.pg.DB.ExecContext(ctx, delete_By_ID_Query, id)
+	_, err := repo.pg_tx.TX.ExecContext(ctx, delete_By_ID_Query, id)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -205,7 +201,7 @@ func (repo *PG_AccountRepository) UpdateByID(id int64, updateAmount float64) (*d
 
 	// In case that the updateAmount is negative (withdraw operation) we need to validate that the account has at least a balance >= the updateAmount
 	var current_balance float64
-	err := repo.pg.DB.QueryRowContext(ctx, get_Account_Balance_Query, id).Scan(&current_balance)
+	err := repo.pg_tx.TX.QueryRowContext(ctx, get_Account_Balance_Query, id).Scan(&current_balance)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -223,7 +219,7 @@ func (repo *PG_AccountRepository) UpdateByID(id int64, updateAmount float64) (*d
 	}
 
 	// update the balance to be equale the old balance + (-/+ Amount)
-	err = repo.pg.DB.QueryRowContext(ctx, update_Balance_By_id_Query, updateAmount+current_balance, id).Scan(&db_acc.ID, &db_acc.OwnerName, &db_acc.Balance, &db_acc.Currency, &db_acc.Activated, &db_acc.CreatedAt, &db_acc.UpdatedAt)
+	err = repo.pg_tx.TX.QueryRowContext(ctx, update_Balance_By_id_Query, updateAmount+current_balance, id).Scan(&db_acc.ID, &db_acc.OwnerName, &db_acc.Balance, &db_acc.Currency, &db_acc.Activated, &db_acc.CreatedAt, &db_acc.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err
