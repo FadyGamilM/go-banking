@@ -11,13 +11,6 @@ func createEntryForTest(req_args *domain.Entry) (*domain.Entry, error) {
 	return test_entry_repo.Create(req_args)
 }
 
-func createUserForTest(req_args *domain.Account) (*domain.Account, error) {
-
-	created_acc, err := test_acc_repo.Create(req_args)
-
-	return created_acc, err
-}
-
 func TestCreateEntry_ForBalanceIncrease(t *testing.T) {
 	// teardown the database content to start fresh :D
 	test_PG_DB.DB.Exec(`DELETE FROM entries`)

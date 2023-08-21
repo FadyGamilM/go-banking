@@ -9,13 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createAccountForTest(req_args *domain.Account) (*domain.Account, error) {
-
-	created_acc, err := test_acc_repo.Create(req_args)
-
-	return created_acc, err
-}
-
 func TestCreateAccount(t *testing.T) {
 	// teardown the database to start clean
 	test_PG_TX.TX.Exec(`DELETE FROM entries`)

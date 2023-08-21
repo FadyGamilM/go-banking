@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"gobanking/internal/core-layer/domain"
 	"gobanking/internal/infra-layer/db/postgres"
 	"log"
 	"os"
@@ -16,9 +17,12 @@ var test_acc_repo *PG_AccountRepository
 var test_entry_repo *PG_EntryRepository
 var test_transfer_Repo *PG_TransferRepository
 
-// func init() {
-// 	test_PG_DB = *postgres.PG_DB{}
-// }
+func createAccountForTest(req_args *domain.Account) (*domain.Account, error) {
+
+	created_acc, err := test_acc_repo.Create(req_args)
+
+	return created_acc, err
+}
 
 func TestMain(m *testing.M) {
 	// initiate
