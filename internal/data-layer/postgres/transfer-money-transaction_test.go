@@ -4,15 +4,18 @@ import (
 	"context"
 	"gobanking/internal/common/types"
 	"gobanking/internal/core-layer/domain"
-	"gobanking/internal/data-layer/postgres/transactions"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestTransferMoneyTransaction(t *testing.T) {
+	// // 0. teardown the database tables
+	// test_PG_DB.DB.Exec(`DELETE FROM transfers`)
+	// test_PG_DB.DB.Exec(`DELETE FROM accounts`)
+
 	// inistantiate a new instance of the transaction store type to execute the transaction
-	txStore := transactions.NewTransactionStore(test_PG_DB)
+	txStore := NewTransactionStore(test_PG_DB)
 
 	// define number of concurrent transactions that will run at the same time (approx)
 	numConcurrentTXs := 5
@@ -33,6 +36,7 @@ func TestTransferMoneyTransaction(t *testing.T) {
 	if err != nil {
 		t.Logf("error while creating the from account : %v \n", err)
 	}
+
 	toAcc, err := createAccountForTest(&domain.Account{
 		OwnerName: "fady gamil",
 		Balance:   float64(100),
@@ -44,7 +48,7 @@ func TestTransferMoneyTransaction(t *testing.T) {
 
 	for tx_idx := 0; tx_idx < numConcurrentTXs; tx_idx++ {
 		go func() {
-			txResult, err := txStore.TransferMoneyTX(context.Background(), types.TransferMoneyTransactionParam{
+			txResult, err := txStore.TransferMoneyTX(context.Background(), &types.TransferMoneyTransactionParam{
 				ToAccountID:   toAcc.ID,
 				FromAccountID: fromAcc.ID,
 				Amount:        amountToTransfer,
@@ -71,7 +75,35 @@ func TestTransferMoneyTransaction(t *testing.T) {
 		require.NotEmpty(t, res.ToEntry)
 		require.NotEmpty(t, res.Transfer)
 
+		// check the created transfer record against our expected values
 		created_transafer := res.Transfer
-		require.Equal(t, created_transafer.ID, )
+		require.NotZero(t, created_transafer.ID)
+		require.Equal(t, fromAcc.ID, created_transafer.FromAccountID)
+		require.Equal(t, toAcc.ID, created_transafer.ToAccountID)
+		require.Equal(t, amountToTransfer, created_transafer.Amount)
+		require.NotZero(t, created_transafer.CreatedAt)
+		require.NotZero(t, created_transafer.UpdatedAt)
+		// and them retrieve the created transfer record from the database to ensure that its persisted and the data are true
+		_, err = test_transfer_Repo.GetByID(created_transafer.ID)
+		require.NoError(t, err)
+
+		// check the created entries
+		from_acc_entry := res.FromEntry
+		require.NotZero(t, from_acc_entry.ID)
+		require.Equal(t, fromAcc.ID, from_acc_entry.AccountID)
+		// the entry is created using the given amount as +ve and at the time of creatinon we pass the -ve sign in case of the from-account, so we have to expect the -ve value with the amountToTransfer too
+		require.Equal(t, -amountToTransfer, from_acc_entry.Amount)
+		require.NotZero(t, from_acc_entry.CreatedAt)
+		require.NotZero(t, from_acc_entry.UpdatedAt)
+
+		to_acc_entry := res.ToEntry
+		require.NotZero(t, to_acc_entry.ID)
+		require.Equal(t, toAcc.ID, to_acc_entry.AccountID)
+		require.Equal(t, amountToTransfer, to_acc_entry.Amount)
+		require.NotZero(t, to_acc_entry.CreatedAt)
+		require.NotZero(t, to_acc_entry.UpdatedAt)
+
+		// TODO : test the updated accounts when we utilize the concurrency patterns
+
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"gobanking/internal/common/types"
 	"gobanking/internal/core-layer/domain"
 	"gobanking/internal/infra-layer/db/postgres"
+	"log"
 )
 
 /*
@@ -17,7 +18,7 @@ import (
 
 ➜ Update the balance of both accounts
 */
-func (ts *transactionStore) TransferMoneyTX(ctx context.Context, args types.TransferMoneyTransactionParam) (*types.TransferMoneyTransactionResult, error) {
+func (ts *transactionStore) TransferMoneyTX(ctx context.Context, args *types.TransferMoneyTransactionParam) (*types.TransferMoneyTransactionResult, error) {
 	var txResult *types.TransferMoneyTransactionResult
 	var err error
 
@@ -32,6 +33,7 @@ func (ts *transactionStore) TransferMoneyTX(ctx context.Context, args types.Tran
 		fromAcc, err := account_repo.GetByID(args.FromAccountID)
 		if err != nil {
 			// return the error to the transaction manager to rollback the transaction
+			log.Printf("error in query which is trying to fetch the from account to check its balance ==> %v \n ", err)
 			return err
 		}
 		if fromAcc.Balance < args.Amount {
@@ -46,15 +48,17 @@ func (ts *transactionStore) TransferMoneyTX(ctx context.Context, args types.Tran
 			Amount:        args.Amount,
 		})
 		if err != nil {
+			log.Printf("error in query which is trying to create a new transfer record in database ==> %v \n ", err)
 			// return the error to the transaction manager to rollback the transaction
 			return err
 		}
 
 		txResult.FromEntry, err = entry_repo.Create(&domain.Entry{
 			AccountID: args.FromAccountID,
-			Amount:    -args.Amount,
+			Amount:    -args.Amount, // when we create an entry, the repo only receives an amount with +ve sign, and
 		})
 		if err != nil {
+			log.Printf("error in query which is trying to create a fromAcc entry record in databsae ==> %v \n ", err)
 			// return the error to the transaction manager to rollback the transaction
 			return err
 		}
@@ -64,6 +68,7 @@ func (ts *transactionStore) TransferMoneyTX(ctx context.Context, args types.Tran
 			Amount:    args.Amount,
 		})
 		if err != nil {
+			log.Printf("error in query which is trying to create a toAcc entry record in databsae ==> %v \n ", err)
 			// return the error to the transaction manager to rollback the transaction
 			return err
 		}

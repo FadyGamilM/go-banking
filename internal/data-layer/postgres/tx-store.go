@@ -32,10 +32,11 @@ func (ts *transactionStore) ManageTransaction(ctx context.Context, fn func(pg_co
 
 	// now we will start executes queries within the context of this transaction (tx)
 	// so we need to create new instance of *sql.DB and pass it to the concrete implementation of all our repos implementations so all of them will execute their built CRUD methods using same instance within the current transaction isolated from other transactions instances
-	tx := *&postgres.PG_TX{TX: pg_tx}
+	tx := postgres.PG_TX{TX: pg_tx}
 	err = fn(&tx)
 	// there is an error while executing one of the queries withint this transaction so we have to rollback
 	if err != nil {
+		log.Printf("====> %v \n", err)
 		if rollBackErr := tx.TX.Rollback(); rollBackErr != nil {
 			log.Printf("Error while trying to ROLLBACK the transaction : %v \n ", rollBackErr)
 			return fmt.Errorf("Error occured in one of the queries within the transaction is : %v \n Error occurred during rolling back a transaction is : %v \n", err, rollBackErr)

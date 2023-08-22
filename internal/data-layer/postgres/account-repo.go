@@ -144,12 +144,12 @@ func (repo *PG_AccountRepository) GetByID(id int64) (*domain.Account, error) {
 		&db_account.UpdatedAt,
 	)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 
 	// define a domain entity type to return to service layer
 	domain_account := db_account.ToDomainEntity()
+	log.Println("repo will return this result => ", domain_account.OwnerName)
 	return domain_account, nil
 }
 
