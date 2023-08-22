@@ -1,11 +1,10 @@
-package transactions
+package postgres
 
 import (
 	"context"
 	"fmt"
 	"gobanking/internal/common/types"
 	"gobanking/internal/core-layer/domain"
-	data_layer "gobanking/internal/data-layer/postgres"
 	"gobanking/internal/infra-layer/db/postgres"
 )
 
@@ -25,9 +24,9 @@ func (ts *transactionStore) TransferMoneyTX(ctx context.Context, args types.Tran
 	// call the ManageTransaction function to start and execute a money transfer transaction and pass it a callback function to be executed (this cb func is the actual transaction steps)
 	err = ts.ManageTransaction(ctx, func(pg_tx *postgres.PG_TX) error {
 		// => Initialize the repos concrete implementation via the transaction that is started via the transaction manager so all queries run within this same transaction
-		account_repo := data_layer.NewPG_AccountRepo(pg_tx)
-		entry_repo := data_layer.NewPG_EntryRepo(pg_tx)
-		transfer_repo := data_layer.NewPG_TransferRepo(pg_tx)
+		account_repo := NewPG_AccountRepo(pg_tx)
+		entry_repo := NewPG_EntryRepo(pg_tx)
+		transfer_repo := NewPG_TransferRepo(pg_tx)
 
 		// retrieve the account which will transfer the money to others to check if it's balance is sufficient for this operation
 		fromAcc, err := account_repo.GetByID(args.FromAccountID)
