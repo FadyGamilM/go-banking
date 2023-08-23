@@ -29,9 +29,16 @@ func (ts *transactionStore) TransferMoneyTX(ctx context.Context, args *types.Tra
 		entry_repo := NewPG_EntryRepo(pg_tx)
 		transfer_repo := NewPG_TransferRepo(pg_tx)
 
+		// check that its the same tx
+		log.Println("Check that its the same instance ...")
+		a, _ := account_repo.GetAll()
+		log.Println("all accounts => ", len(a))
+
 		// retrieve the account which will transfer the money to others to check if it's balance is sufficient for this operation
+		log.Println("the id from the args is : ", args.FromAccountID)
 		fromAcc, err := account_repo.GetByID(args.FromAccountID)
 		if err != nil {
+			log.Printf("the retrieved from account is : %v \n", fromAcc)
 			// return the error to the transaction manager to rollback the transaction
 			log.Printf("error in query which is trying to fetch the from account to check its balance ==> %v \n ", err)
 			return err

@@ -36,12 +36,11 @@ func (ts *transactionStore) ManageTransaction(ctx context.Context, fn func(pg_co
 	err = fn(&tx)
 	// there is an error while executing one of the queries withint this transaction so we have to rollback
 	if err != nil {
-		log.Printf("====> %v \n", err)
 		if rollBackErr := tx.TX.Rollback(); rollBackErr != nil {
 			log.Printf("Error while trying to ROLLBACK the transaction : %v \n ", rollBackErr)
-			return fmt.Errorf("Error occured in one of the queries within the transaction is : %v \n Error occurred during rolling back a transaction is : %v \n", err, rollBackErr)
+			return fmt.Errorf("error occured in one of the queries within the transaction is : %v \n Error occurred during rolling back a transaction is : %v \n", err, rollBackErr)
 		}
-		return fmt.Errorf("Error occured in one of the queries within the transaction is : %v \n", err)
+		return fmt.Errorf("error occured in one of the queries within the transaction is : %v \n", err)
 	}
 
 	// if everything is okay  => Commit the transaction :D
