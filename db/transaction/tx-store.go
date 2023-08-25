@@ -103,7 +103,6 @@ func (pgtx *PgTxStore) TransferMoneyTransaction(ctx context.Context, args Transf
 		if retrievedFromAcc.ID == int64(0) {
 			return fmt.Errorf("there is no account with id = %v \n", retrievedFromAcc.ID)
 		}
-		log.Printf("the retrieved from-account id is : %v \n", retrievedFromAcc.ID)
 		if retrievedFromAcc.Balance < args.Amount {
 			return fmt.Errorf("the account with id %v has balance = $%v , which is less than the specified amount = %v in the transaction \n", retrievedFromAcc.ID, retrievedFromAcc.Balance, args.Amount)
 		}
@@ -117,7 +116,6 @@ func (pgtx *PgTxStore) TransferMoneyTransaction(ctx context.Context, args Transf
 		if retrievedToAcc.ID == int64(0) {
 			return fmt.Errorf("there is no account with id = %v \n", args.ToAccID)
 		}
-		log.Printf("the retrieved to-account id is : %v \n", retrievedFromAcc.ID)
 
 		// create the transfer record in database
 		result.Transfer, err = transferRepo.Create(ctx, &transfer.Transfer{
