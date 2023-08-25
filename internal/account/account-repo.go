@@ -29,13 +29,14 @@ const (
 
 	get_All_Query = `
 		SELECT id, owner_name, balance, currency, activated, created_at, updated_at
-		FROM accounts
+		FROM accounts 
 	`
 
 	get_By_ID_Query = `
 		SELECT id, owner_name, balance, currency, activated, created_at, updated_at
 		FROM accounts
 		WHERE id = $1
+		FOR NO KEY UPDATE
 	`
 
 	get_By_OwnerName_Query = `
@@ -56,7 +57,7 @@ const (
 
 	update_Balance_By_id_Query = `
 		UPDATE accounts 
-		SET balance = $1 
+		SET balance = balance + $1 
 		WHERE id = $2
 		RETURNING id, owner_name, balance, currency, activated, created_at, updated_at 
 	`
@@ -183,7 +184,7 @@ func (repo *accountRepo) UpdateByID(ctx context.Context, id int64, updateAmount 
 	}
 
 	// update the balance to be equale the old balance + (-/+ Amount)
-	err = repo.pg.DB.QueryRowContext(ctx, update_Balance_By_id_Query, updateAmount+current_balance, id).Scan(&account.ID, &account.OwnerName, &account.Balance, &account.Currency, &account.Activated, &account.CreatedAt, &account.UpdatedAt)
+	err = repo.pg.DB.QueryRowContext(ctx, update_Balance_By_id_Query, updateAmount, id).Scan(&account.ID, &account.OwnerName, &account.Balance, &account.Currency, &account.Activated, &account.CreatedAt, &account.UpdatedAt)
 	if err != nil {
 		log.Println(err)
 		return nil, err
