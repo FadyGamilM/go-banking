@@ -100,29 +100,29 @@ func (pgtx *PgTxStore) TransferMoneyTransaction(ctx context.Context, args Transf
 		txName := ctx.Value(txKey)
 
 		// fetch the from-account to ensure that its stored in database and its balance is sufficient to perform this transafer
-		log.Printf("[%v] | fetch the from-account", txName)
-		retrievedFromAcc, err := accRepo.GetByID(ctx, args.FromAccID)
-		if err != nil {
-			log.Printf("error while fetching the from-account from database : %v", err)
-			return err
-		}
-		if retrievedFromAcc.ID == int64(0) {
-			return fmt.Errorf("there is no account with id = %v", retrievedFromAcc.ID)
-		}
-		if retrievedFromAcc.Balance < args.Amount {
-			return fmt.Errorf("the account with id %v has balance = $%v , which is less than the specified amount = %v in the transaction", retrievedFromAcc.ID, retrievedFromAcc.Balance, args.Amount)
-		}
+		// log.Printf("[%v] | fetch the from-account", txName)
+		// retrievedFromAcc, err := accRepo.GetByID(ctx, args.FromAccID)
+		// if err != nil {
+		// 	log.Printf("error while fetching the from-account from database : %v", err)
+		// 	return err
+		// }
+		// if retrievedFromAcc.ID == int64(0) {
+		// 	return fmt.Errorf("there is no account with id = %v", retrievedFromAcc.ID)
+		// }
+		// if retrievedFromAcc.Balance < args.Amount {
+		// 	return fmt.Errorf("the account with id %v has balance = $%v , which is less than the specified amount = %v in the transaction", retrievedFromAcc.ID, retrievedFromAcc.Balance, args.Amount)
+		// }
 
-		// fetch the to-account to ensure that its stored in database
-		log.Printf("[%v] | fetch the to-account", txName)
-		retrievedToAcc, err := accRepo.GetByID(ctx, args.ToAccID)
-		if err != nil {
-			log.Printf("error while fetching the to-account from database : %v ", err)
-			return err
-		}
-		if retrievedToAcc.ID == int64(0) {
-			return fmt.Errorf("there is no account with id = %v", args.ToAccID)
-		}
+		// // fetch the to-account to ensure that its stored in database
+		// log.Printf("[%v] | fetch the to-account", txName)
+		// retrievedToAcc, err := accRepo.GetByID(ctx, args.ToAccID)
+		// if err != nil {
+		// 	log.Printf("error while fetching the to-account from database : %v ", err)
+		// 	return err
+		// }
+		// if retrievedToAcc.ID == int64(0) {
+		// 	return fmt.Errorf("there is no account with id = %v", args.ToAccID)
+		// }
 
 		// create the transfer record in database
 		log.Printf("[%v] | create the transfer record", txName)
@@ -156,21 +156,38 @@ func (pgtx *PgTxStore) TransferMoneyTransaction(ctx context.Context, args Transf
 		}
 
 		// TODO => update the accounts balances
-		// i already have fetched the accounts so i don't have to ensure that there are accounts with these provided ids .. now lets move to the update query
-		log.Printf("[%v] | update the from-account", txName)
-		updatedFromAcc, err := accRepo.UpdateByID(ctx, args.FromAccID, -args.Amount)
-		if err != nil {
-			return fmt.Errorf("error while updating the from-account balance : %v", err)
+		// reorder the update of the 2 accounts so we ensure that the change to acc1 in tx1 will be done and then the change to acc2 to tx1 is done after it, and at the same time the change in acc1 in tx2 is done before the change of the acc2 of tx2 is done even if in tx2 the change to acc2 is acquired first i will re-order it
+		if args.FromAccID > args.ToAccID {
+			// i already have fetched the accounts so i don't have to ensure that there are accounts with these provided ids .. now lets move to the update query
+			log.Printf("[%v] | update the from-account", txName)
+			updatedFromAcc, err := accRepo.UpdateByID(ctx, args.FromAccID, -args.Amount)
+			if err != nil {
+				return fmt.Errorf("error while updating the from-account balance : %v", err)
+			}
+
+			log.Printf("[%v] | update the to-account", txName)
+			updatedToAcc, err := accRepo.UpdateByID(ctx, args.ToAccID, args.Amount)
+			if err != nil {
+				return fmt.Errorf("error while updating the to-account balance : %v", err)
+			}
+			result.FromAcc = updatedFromAcc
+			result.ToAcc = updatedToAcc
+		} else {
+			log.Printf("[%v] | update the to-account", txName)
+			updatedToAcc, err := accRepo.UpdateByID(ctx, args.ToAccID, args.Amount)
+			if err != nil {
+				return fmt.Errorf("error while updating the to-account balance : %v", err)
+			}
+
+			log.Printf("[%v] | update the from-account", txName)
+			updatedFromAcc, err := accRepo.UpdateByID(ctx, args.FromAccID, -args.Amount)
+			if err != nil {
+				return fmt.Errorf("error while updating the from-account balance : %v", err)
+			}
+			result.FromAcc = updatedFromAcc
+			result.ToAcc = updatedToAcc
 		}
 
-		log.Printf("[%v] | update the to-account", txName)
-		updatedToAcc, err := accRepo.UpdateByID(ctx, args.ToAccID, args.Amount)
-		if err != nil {
-			return fmt.Errorf("error while updating the to-account balance : %v", err)
-		}
-
-		result.FromAcc = updatedFromAcc
-		result.ToAcc = updatedToAcc
 		return nil
 	})
 

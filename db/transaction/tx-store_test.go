@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// all concurrent transactions transfer money from account-1 to account-2, so the deadlock might comes from the fact that tx-2 can read a wrong value not the updated value from tx-1 which run before tx-2, and i solved it via using the exclusve lock with NO KEY query option
 func TestTransferMoneyTransaction(t *testing.T) {
 	// define the context of the entire transaction (will be passed to the data layer via the service layer later when we build it)
 	ctx := context.Background()
@@ -130,4 +131,87 @@ func TestTransferMoneyTransaction(t *testing.T) {
 
 	fmt.Printf(">> the final value of balance after all transactions is $%v for the from-account and $%v for the to-account \n", finalUpdatedFromAcc.Balance, finalUpdatedToAcc.Balance)
 	t.Logf(">> the final value of balance after all transactions is $%v for the from-account and $%v for the to-account", finalUpdatedFromAcc.Balance, finalUpdatedToAcc.Balance)
+}
+
+// in this unit test, i am testing the deadlock avoidance and how my logic stands against the deadlock
+func TestTransferMoneyTransactionDeadLock(t *testing.T) {
+	// define the context of the entire transaction (will be passed to the data layer via the service layer later when we build it)
+	ctx := context.Background()
+
+	// define the pgTxStore instance to manage our transaction
+	pgTxStore := newPgTxStore(TestSqlDB)
+
+	// create the account that will transfer the moeny
+	acc1, err := createAccountForTest(ctx, &account.Account{
+		OwnerName: "amira",
+		Balance:   float64(200),
+		Currency:  "EGP",
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, acc1)
+	require.NotZero(t, acc1.ID)
+
+	// create the account that will receive the transfered money
+	acc2, err := createAccountForTest(ctx, &account.Account{
+		OwnerName: "samira",
+		Balance:   float64(300),
+		Currency:  "EGP",
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, acc2)
+	require.NotZero(t, acc2.ID)
+
+	fmt.Printf(">> the initial value of balance before all transactions is $%v and $%v \n", acc1.Balance, acc2.Balance)
+	t.Logf(">> the initial value of balance before all transactions is $%v and $%v \n", acc1.Balance, acc2.Balance)
+
+	// amount to be transfered
+	amount := float64(10)
+
+	// how many transaction will happen at almost the same time
+	concurrentTXs := 10
+
+	// channels so we can communicate with the running concurrent transactions
+	errs := make(chan error)
+
+	// run the concurrent transaction to heavily test my transaction implementation logic
+	for i := 0; i < concurrentTXs; i++ {
+		fromAcc := acc1
+		toAcc := acc2
+		txName := fmt.Sprintf("tx #%v", i)
+		// for odd concurrent transaction we will transfer from acc1 to acc2
+		// for even concurrent transaction we will transfer from acc2 to acc1
+		if i%2 == 1 {
+			fromAcc = acc2
+			toAcc = acc1
+		}
+		fmt.Printf(" tx %v >> from account is %v and to acount is %v \n", i, fromAcc.ID, toAcc.ID)
+		go func() {
+			txctx := context.WithValue(ctx, txKey, txName)
+			_, err := pgTxStore.TransferMoneyTransaction(txctx, TransferMoneyTransactionParams{
+				ToAccID:   toAcc.ID,
+				FromAccID: fromAcc.ID,
+				Amount:    amount,
+			})
+			errs <- err
+		}()
+	}
+
+	// test the results to ensure the correctnes of our transactions
+	for i := 0; i < concurrentTXs; i++ {
+		// read from the errors chanel to check if there is any error occurred
+		err := <-errs
+		require.NoError(t, err)
+	}
+
+	// now we need to check the final balance of both accounts from the database
+	finalUpdatedFromAcc, err := accTestRepo.GetByID(ctx, acc1.ID)
+	require.NoError(t, err)
+	require.Equal(t, acc1.Balance, finalUpdatedFromAcc.Balance)
+
+	finalUpdatedToAcc, err := accTestRepo.GetByID(ctx, acc2.ID)
+	require.NoError(t, err)
+	require.Equal(t, acc2.Balance, finalUpdatedToAcc.Balance)
+
+	fmt.Printf(">> the final value of balance after all transactions is $%v and $%v \n", finalUpdatedFromAcc.Balance, finalUpdatedToAcc.Balance)
+	t.Logf(">> the final value of balance after all transactions is $%v and $%v", finalUpdatedFromAcc.Balance, finalUpdatedToAcc.Balance)
 }
