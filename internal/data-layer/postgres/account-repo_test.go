@@ -10,10 +10,10 @@ import (
 )
 
 func TestCreateAccount(t *testing.T) {
-	// teardown the database to start clean
-	test_PG_TX.TX.Exec(`DELETE FROM entries`)
-	test_PG_TX.TX.Exec(`DELETE FROM transfers`)
-	test_PG_TX.TX.Exec(`DELETE FROM accounts`)
+	// // teardown the database to start clean
+	// test_PG_TX.TX.Exec(`DELETE FROM entries`)
+	// test_PG_TX.TX.Exec(`DELETE FROM transfers`)
+	// test_PG_TX.TX.Exec(`DELETE FROM accounts`)
 
 	req_args := domain.Account{
 		OwnerName: "fady",
@@ -40,9 +40,9 @@ func TestCreateAccount(t *testing.T) {
 
 func TestGetAccountByID(t *testing.T) {
 	// teardown the database to start clean
-	test_PG_TX.TX.Exec(`DELETE FROM entries`)
-	test_PG_TX.TX.Exec(`DELETE FROM transfers`)
-	test_PG_TX.TX.Exec(`DELETE FROM accounts`)
+	// test_PG_TX.TX.Exec(`DELETE FROM entries`)
+	// test_PG_TX.TX.Exec(`DELETE FROM transfers`)
+	// test_PG_TX.TX.Exec(`DELETE FROM accounts`)
 
 	req_args := domain.Account{
 		OwnerName: "ahmed",
