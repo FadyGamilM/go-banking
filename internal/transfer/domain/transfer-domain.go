@@ -14,7 +14,13 @@ type Transfer struct {
 	UpdatedAt     time.Time
 }
 
-type TransferRepository interface {
+type TransferRepo interface {
+	Create(context.Context, *Transfer) (*Transfer, error)
+	GetAll(context.Context) ([]*Transfer, error)
+	GetByID(context.Context, int64) (*Transfer, error)
+}
+
+type TransferService interface {
 	Create(context.Context, *Transfer) (*Transfer, error)
 	GetAll(context.Context) ([]*Transfer, error)
 	GetByID(context.Context, int64) (*Transfer, error)

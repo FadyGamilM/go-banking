@@ -10,7 +10,7 @@ $$ language 'plpgsql';
 CREATE TABLE accounts (
   id BIGSERIAL PRIMARY KEY,
   owner_name VARCHAR(100) NOT NULL,
-  balance DECIMAL NOT NULL CHECK(balance > 0.0),
+  balance DECIMAL NOT NULL CHECK(balance >= 0.0),
   currency VARCHAR(10) NOT NULL,
   activated BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now() NOT NULL,

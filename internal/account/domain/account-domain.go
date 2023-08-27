@@ -23,3 +23,12 @@ type AccountRepo interface {
 	DeleteByID(context.Context, int64) error
 	UpdateByID(context.Context, int64, float64) (*Account, error)
 }
+
+type AccountService interface {
+	Create(context.Context, *Account) (*Account, error)
+	GetAll(context.Context) ([]*Account, error)
+	GetByID(context.Context, int64) (*Account, error)
+	GetByOwnerName(context.Context, string) (*Account, error)
+	DeleteByID(context.Context, int64) error
+	UpdateByID(context.Context, int64, float64) (*Account, error)
+}
