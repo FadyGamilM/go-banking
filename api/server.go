@@ -47,9 +47,11 @@ func NewServer(accountHandler *AccountHandler, entryHandler *EntryHandler, trans
 	entriesRouter := r.Group("/api/v1/entries")
 
 	// map the methods to the routes
-	accountsRouter.POST("/", accountHandler.HandleCreateAccount)
-	entriesRouter.POST("/", entryHandler.HandleCreateEntry)
-	transfersRouter.POST("/", transferHandler.HandleCreateTransfer)
+	accountsRouter.POST("", accountHandler.HandleCreateAccount)
+	accountsRouter.GET("/:id", accountHandler.HandleGetAccountByID)
+	accountsRouter.GET("", accountHandler.HandleGetAccountsInPages)
+	entriesRouter.POST("", entryHandler.HandleCreateEntry)
+	transfersRouter.POST("", transferHandler.HandleCreateTransfer)
 
 	// set the router to the server.router
 	server.router = r

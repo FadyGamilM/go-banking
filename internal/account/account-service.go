@@ -2,7 +2,10 @@ package account
 
 import (
 	"context"
+	"database/sql"
+	"log"
 
+	"github.com/FadyGamilM/go-banking-v2/common"
 	account "github.com/FadyGamilM/go-banking-v2/internal/account/domain"
 )
 
@@ -24,8 +27,18 @@ func (s *accountService) GetAll(context.Context) ([]*account.Account, error) {
 	return nil, nil
 }
 
-func (s *accountService) GetByID(context.Context, int64) (*account.Account, error) {
-	return nil, nil
+func (s *accountService) GetByID(ctx context.Context, id int64) (*account.Account, error) {
+	log.Println("the id at the service layer is : ", id)
+	acc, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		// this should be handled by a proper error handler "constant string"
+		if err == sql.ErrNoRows {
+			return nil, common.NotFound
+		}
+		return nil, common.InternalServerError
+	}
+
+	return acc, nil
 }
 
 func (s *accountService) GetByOwnerName(ctx context.Context, ownerName string) (*account.Account, error) {

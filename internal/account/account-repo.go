@@ -124,6 +124,8 @@ func (repo *accountRepo) GetAll(ctx context.Context) ([]*domain.Account, error) 
 func (repo *accountRepo) GetByID(ctx context.Context, id int64) (*domain.Account, error) {
 	// define database entity type to scan the query result
 	account := new(domain.Account)
+
+	log.Println("the id in the repo layer is : ", id)
 	err := repo.pg.DB.QueryRowContext(ctx, get_By_ID_Query, id).Scan(
 		&account.ID,
 		&account.OwnerName,
