@@ -51,3 +51,7 @@ func (s *accountService) DeleteByID(ctx context.Context, accountID int64) error 
 func (s *accountService) UpdateByID(ctx context.Context, accountID int64, amount float64) (*account.Account, error) {
 	return nil, nil
 }
+
+func (s *accountService) GetAllInPages(ctx context.Context, limit, offset int32) ([]*account.Account, error) {
+	return s.repo.GetAllInPages(ctx, limit, offset)
+}

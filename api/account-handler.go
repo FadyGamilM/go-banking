@@ -87,7 +87,15 @@ func (h *AccountHandler) HandleGetAccountsInPages(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, responseWithError(err))
 	}
 
-	log.Println("the page number is : ", reqDto.PageID)
-	log.Println("the accounts per page are : ", reqDto.PageSize)
-	ctx.JSON(http.StatusOK, "[]")
+	log.Println("id : ", reqDto.PageID, " size : ", reqDto.PageSize)
+
+	var accountsPerPage []*account.Account
+	var err error
+	accountsPerPage, err = h.srv.GetAllInPages(ctx, reqDto.PageSize, (reqDto.PageID-1)*5)
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusInternalServerError, responseWithError(common.InternalServerError))
+	}
+	ctx.JSON(http.StatusOK, accountsPerPage)
+
 }

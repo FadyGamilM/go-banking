@@ -32,6 +32,13 @@ const (
 		FROM accounts 
 	`
 
+	get_Pages_Query = `
+		SELECT id, owner_name, balance, currency, activated, created_at, updated_at
+		FROM accounts 
+		LIMIT $1 OFFSET $2
+	
+	`
+
 	get_By_ID_Query = `
 		SELECT id, owner_name, balance, currency, activated, created_at, updated_at
 		FROM accounts
@@ -87,6 +94,35 @@ func (repo *accountRepo) Create(ctx context.Context, acc *domain.Account) (*doma
 	}
 
 	return createdAccount, nil
+}
+
+// fetch all accounts in pages
+func (repo *accountRepo) GetAllInPages(ctx context.Context, limit, offset int32) ([]*domain.Account, error) {
+	rows, err := repo.pg.DB.QueryContext(ctx, get_Pages_Query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := []*domain.Account{}
+	for rows.Next() {
+		account := new(domain.Account)
+		err := rows.Scan(
+			&account.ID,
+			&account.OwnerName,
+			&account.Balance,
+			&account.Currency,
+			&account.Activated,
+			&account.CreatedAt,
+			&account.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		accounts = append(accounts, account)
+	}
+
+	return accounts, nil
 }
 
 // get all accounts

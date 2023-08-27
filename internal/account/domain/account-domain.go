@@ -22,6 +22,7 @@ type AccountRepo interface {
 	GetByOwnerName(context.Context, string) (*Account, error)
 	DeleteByID(context.Context, int64) error
 	UpdateByID(context.Context, int64, float64) (*Account, error)
+	GetAllInPages(ctx context.Context, limit, offset int32) ([]*Account, error)
 }
 
 type AccountService interface {
@@ -31,4 +32,5 @@ type AccountService interface {
 	GetByOwnerName(context.Context, string) (*Account, error)
 	DeleteByID(context.Context, int64) error
 	UpdateByID(context.Context, int64, float64) (*Account, error)
+	GetAllInPages(ctx context.Context, limit, offset int32) ([]*Account, error)
 }
