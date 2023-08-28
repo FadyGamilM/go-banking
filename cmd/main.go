@@ -10,6 +10,7 @@ import (
 	"github.com/FadyGamilM/go-banking-v2/internal/account"
 	"github.com/FadyGamilM/go-banking-v2/internal/entry"
 	"github.com/FadyGamilM/go-banking-v2/internal/transfer"
+	"github.com/FadyGamilM/go-banking-v2/utils"
 )
 
 const (
@@ -24,10 +25,15 @@ const (
 
 func main() {
 
-	// get the *sql.DB and *db.PG instance
-	_, PG := setupDatabaseConnection()
+	configs, err := utils.LoadConfig("..")
+	log.Println("the db host", configs.DbHost)
+	if err != nil {
+		log.Fatalf("error while loading config files => %v", err)
+	}
 
-	log.Println("setup db ")
+	// get the *sql.DB and *db.PG instance
+	_, PG := setupDatabaseConnection(configs)
+
 	// get all repos
 	accountRepo := account.NewAccountRepo(PG)
 	entryRepo := entry.NewEntryRepo(PG)
@@ -43,13 +49,14 @@ func main() {
 
 	server := api.NewServer(accountHandler, entryHandler, transferHandler)
 
-	server.Start(serverAddr)
+	server.Start(configs.ServerAddr)
 
 }
 
-func setupDatabaseConnection() (*sql.DB, *db.PG) {
-	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+func setupDatabaseConnection(configs utils.DevConfig) (*sql.DB, *db.PG) {
 	var err error
+
+	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", configs.DbHost, configs.DbPort, configs.DbUsername, configs.DbPassword, configs.DbName)
 
 	connPool, err := db.Connect(connStr)
 	if err != nil {
